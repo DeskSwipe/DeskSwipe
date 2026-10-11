@@ -6,6 +6,8 @@ Windows-style "show desktop" for macOS, driven by trackpad gestures.
 - **3-finger swipe up**: restore only those windows. Windows you minimized yourself stay minimized.
 - After swiping down, clicking a window's Dock thumbnail restores just that window (standard macOS behavior). DeskSwipe notices and forgets that window.
 
+See [FEATURES.md](FEATURES.md) for the full feature list, capabilities and backlog.
+
 DeskSwipe is a menu bar app with no Dock icon. Clicking its icon opens a panel with status and an on/off switch for each feature. It is free to build and run with Apple's Command Line Tools, and has no third-party dependencies.
 
 ## Requirements
@@ -20,7 +22,17 @@ DeskSwipe is a menu bar app with no Dock icon. Clicking its icon opens a panel w
 ./build.sh
 ```
 
-This runs the unit tests, builds a release binary for arm64, assembles `build/DeskSwipe.app` with its `Info.plist` (`LSUIElement = true`), and ad-hoc signs it with `codesign -s -`. Set `SKIP_TESTS=1` to skip the tests.
+This runs the unit tests, builds a release binary for arm64, assembles `build/DeskSwipe.app` with its `Info.plist` (`LSUIElement = true`) and icon, and signs it. Set `SKIP_TESTS=1` to skip the tests.
+
+### Keep permissions across rebuilds (recommended if you develop)
+
+By default the app is ad-hoc signed (`codesign -s -`). macOS ties the Accessibility permission to that exact build, so every rebuild needs permission granted again. Run once:
+
+```sh
+./scripts/setup-signing.sh
+```
+
+This creates a self-signed **DeskSwipe Local Signing** certificate in your login keychain. It is local only, free, and grants no extra trust. `build.sh` uses it automatically when it exists; delete it in Keychain Access to go back to ad-hoc signing. Grant Accessibility once more after the first build signed this way, and from then on rebuilds keep it.
 
 Install and launch:
 
@@ -94,11 +106,11 @@ Lifting fingers or changing the finger count starts a new gesture. If a gesture 
 
 **Nothing happens when I swipe.**
 - Open the menu bar panel: is Accessibility **granted**? Is the **Swipe to Show Desktop** switch on? Is a trackpad connected?
-- **After every rebuild**, macOS may treat the ad-hoc-signed app as a new app, and the old Accessibility entry stops working even though it still looks enabled. Remove DeskSwipe from the list with **−** and add it again, or reset it:
+- **After a rebuild** (ad-hoc signing, or the first build after running `scripts/setup-signing.sh`), the old Accessibility entry stops working even though it still looks enabled; toggling it does nothing. Remove DeskSwipe from the list with **−** and add it again, or reset it:
   ```sh
   tccutil reset Accessibility local.deskswipe.DeskSwipe
   ```
-  Then relaunch DeskSwipe and grant permission again.
+  Then relaunch DeskSwipe and grant permission again. To stop this happening on every rebuild, see *Keep permissions across rebuilds*.
 - Try a higher sensitivity in Settings.
 
 **Mission Control / App Exposé opens as well.** See *First-run setup, step 2*.
@@ -141,7 +153,10 @@ Sources/DeskSwipe/              The app
 Tests/DeskSwipeCoreTests/       Swift Testing suites
 Resources/Info.plist
 Resources/AppIcon.svg          Icon source; scripts/make-icon.sh regenerates AppIcon.icns
+scripts/make-icon.sh            Renders AppIcon.svg into AppIcon.icns
+scripts/setup-signing.sh        Creates the local signing identity
 build.sh
+FEATURES.md                     Feature & capability tracker, backlog, changelog
 reference/main.swift            Original single-file prototype
 ```
 
