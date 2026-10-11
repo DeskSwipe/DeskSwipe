@@ -205,7 +205,7 @@ final class MultitouchService {
             symbols.start(device, 0)
         }
         deviceCount = devices.count
-        log.info("Started \(self.deviceCount) multitouch device(s)")
+        log.notice("Started \(self.deviceCount) multitouch device(s)")
         onDevicesChanged?(deviceCount)
     }
 
