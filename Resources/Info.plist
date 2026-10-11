@@ -8,6 +8,8 @@
 	<string>DeskSwipe</string>
 	<key>CFBundleExecutable</key>
 	<string>DeskSwipe</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>local.deskswipe.DeskSwipe</string>
 	<key>CFBundleInfoDictionaryVersion</key>

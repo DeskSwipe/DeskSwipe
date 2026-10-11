@@ -140,6 +140,7 @@ Sources/DeskSwipe/              The app
   AppDelegate.swift, main.swift
 Tests/DeskSwipeCoreTests/       Swift Testing suites
 Resources/Info.plist
+Resources/AppIcon.svg          Icon source; scripts/make-icon.sh regenerates AppIcon.icns
 build.sh
 reference/main.swift            Original single-file prototype
 ```
