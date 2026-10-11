@@ -4,7 +4,7 @@ import DeskSwipeCore
 
 /// The menu bar icon. Clicking it opens a popover panel with status and a
 /// toggle per feature.
-final class StatusBarController: NSObject, NSPopoverDelegate {
+final class StatusBarController: NSObject {
     var onOpenSettings: (() -> Void)?
 
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
@@ -19,7 +19,6 @@ final class StatusBarController: NSObject, NSPopoverDelegate {
         super.init()
 
         popover.behavior = .transient
-        popover.delegate = self
         popover.contentViewController = panel
         panel.onOpenSettings = { [weak self] in
             self?.popover.performClose(nil)
@@ -58,21 +57,8 @@ final class StatusBarController: NSObject, NSPopoverDelegate {
         status.refreshAccessibility()
         status.refreshConflicts()
         panel.reload()
-        // Become the active app while the panel is open. A key window owned
-        // by a background app leaves the system in a half-focused state
-        // (e.g. the auto-hiding Dock would not reveal).
-        NSApp.activate()
         popover.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
         popover.contentViewController?.view.window?.makeKey()
-    }
-
-    func popoverDidClose(_ notification: Notification) {
-        // Hand focus back to the previous app, unless the panel opened one of
-        // our own windows (Settings) or an alert.
-        let ownWindowVisible = NSApp.windows.contains { $0.isVisible && $0.level == .normal }
-        if !ownWindowVisible && NSApp.modalWindow == nil {
-            NSApp.hide(nil)
-        }
     }
 }
 
