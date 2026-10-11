@@ -6,7 +6,7 @@ Windows-style "show desktop" for macOS, driven by trackpad gestures.
 - **3-finger swipe up**: restore only those windows. Windows you minimized yourself stay minimized.
 - After swiping down, clicking a window's Dock thumbnail restores just that window (standard macOS behavior). DeskSwipe notices and forgets that window.
 
-DeskSwipe is a menu bar app with no Dock icon. It is free to build and run with Apple's Command Line Tools, and has no third-party dependencies.
+DeskSwipe is a menu bar app with no Dock icon. Clicking its icon opens a panel with status and an on/off switch for each feature. It is free to build and run with Apple's Command Line Tools, and has no third-party dependencies.
 
 ## Requirements
 
@@ -43,14 +43,14 @@ swift run DeskSwipe     # runs unbundled; prefer the .app for real use
 
 DeskSwipe minimizes and restores windows through the Accessibility API. On first launch macOS shows a prompt:
 
-1. Click **Open System Settings**, or use the menu bar item **Accessibility permission needed — Open Settings…**.
+1. Click **Open System Settings**, or click the menu bar icon and press **Grant…** next to *Accessibility needed*.
 2. In **Privacy & Security > Accessibility**, switch on **DeskSwipe**.
 
-The menu's first line shows whether permission is granted. DeskSwipe checks every couple of seconds and picks up the change without a restart.
+The panel's **Status** section shows whether permission is granted. DeskSwipe checks every couple of seconds and picks up the change without a restart.
 
 ### 2. Move macOS's own 3-finger swipes out of the way (strongly recommended)
 
-By default macOS uses 3-finger swipe up/down for Mission Control and App Exposé, so both would fire at once. DeskSwipe detects this and shows a warning in the menu and in Settings. To fix it:
+By default macOS uses 3-finger swipe up/down for Mission Control and App Exposé, so both would fire at once. DeskSwipe detects this and shows a *Gesture conflict* row in the panel and a warning in Settings. To fix it:
 
 **System Settings > Trackpad > More Gestures**: set **Mission Control** and **App Exposé** to **Swipe Up/Down with Four Fingers**, or **Off**.
 
@@ -60,11 +60,11 @@ DeskSwipe does not change these settings for you.
 
 ## Settings
 
-Open from the menu bar: **Settings…**
+Open from the menu bar panel: **Settings** (⌘,).
 
 | Setting | What it does |
 |---|---|
-| Enabled | Turns gesture handling on or off (also in the menu). |
+| Enabled | Turns gesture handling on or off. Same as the **Swipe to Show Desktop** switch in the menu bar panel. |
 | Sensitivity | How far you must swipe: from ~40% of trackpad height (Low) to ~8% (High). The default is 18%. |
 | Invert direction | Swipe up to show the desktop, swipe down to restore. |
 | Launch at login | Registers the app with `SMAppService.mainApp`. macOS may ask you to approve it under General > Login Items. |
@@ -86,14 +86,14 @@ Lifting fingers or changing the finger count starts a new gesture. If a gesture 
 - **Current Space only.** The Accessibility API only reports windows on the active Space, so DeskSwipe minimizes (and later restores) only those. Windows on other Spaces are left alone. This is by design.
 - **Full-screen windows are skipped.** macOS cannot minimize them this way. The same goes for floating panels and windows without a minimize control.
 - **Only regular apps** (apps with a Dock icon) are affected. DeskSwipe never touches its own windows.
-- **Private framework.** Trackpad input comes from Apple's private `MultitouchSupport` framework, loaded at runtime. A future macOS update could change or remove it. If that happens, the menu shows "Gesture input unavailable" and the app keeps running.
+- **Private framework.** Trackpad input comes from Apple's private `MultitouchSupport` framework, loaded at runtime. A future macOS update could change or remove it. If that happens, the panel shows "Gesture input unavailable" and the app keeps running.
 - Swiping down again while windows are still hidden adds the new windows to the remembered list; the next swipe up restores all of them.
 - Restore order: windows come back in their original stacking order as far as possible, with the frontmost last.
 
 ## Troubleshooting
 
 **Nothing happens when I swipe.**
-- Check the menu: is Accessibility **granted**? Is **Enabled** checked? Is a trackpad detected?
+- Open the menu bar panel: is Accessibility **granted**? Is the **Swipe to Show Desktop** switch on? Is a trackpad connected?
 - **After every rebuild**, macOS may treat the ad-hoc-signed app as a new app, and the old Accessibility entry stops working even though it still looks enabled. Remove DeskSwipe from the list with **−** and add it again, or reset it:
   ```sh
   tccutil reset Accessibility local.deskswipe.DeskSwipe
@@ -103,7 +103,7 @@ Lifting fingers or changing the finger count starts a new gesture. If a gesture 
 
 **Mission Control / App Exposé opens as well.** See *First-run setup, step 2*.
 
-**Gestures stop after connecting a Magic Trackpad, or after sleep.** DeskSwipe re-enumerates devices about a second after a trackpad connects or disconnects, and after wake. If gestures still don't work, toggle **Enabled**, or quit and relaunch.
+**Gestures stop after connecting a Magic Trackpad, or after sleep.** DeskSwipe re-enumerates devices about a second after a trackpad connects or disconnects, and after wake. If gestures still don't work, turn the **Swipe to Show Desktop** switch off and on, or quit and relaunch.
 
 **Some windows were not minimized.** They may be full screen, on another Space, a floating panel, or in an app that doesn't respond to Accessibility requests (DeskSwipe waits at most 1 s per request).
 
@@ -133,7 +133,7 @@ Sources/DeskSwipeCore/          Pure logic, unit tested
 Sources/DeskSwipe/              The app
   MultitouchService.swift       dlopen/dlsym MultitouchSupport, hot-plug, wake
   WindowManager.swift           AXUIElement backend, AXObservers, app-quit cleanup
-  StatusMenuController.swift    Menu bar item and menu
+  StatusBarController.swift     Menu bar item and its status/feature panel
   SettingsView.swift            SwiftUI settings window
   AppSettings.swift             UserDefaults-backed preferences
   SystemStatus.swift            Accessibility, conflicts, devices, login item
@@ -147,7 +147,7 @@ reference/main.swift            Original single-file prototype
 
 ## Uninstall
 
-Quit DeskSwipe from its menu, turn off Launch at login first if you enabled it, then:
+Quit DeskSwipe from its panel, turn off Launch at login first if you enabled it, then:
 
 ```sh
 rm -rf /Applications/DeskSwipe.app

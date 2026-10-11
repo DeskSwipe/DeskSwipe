@@ -10,13 +10,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let status = SystemStatus()
     private let multitouch = MultitouchService()
     private let windows = WindowManager()
-    private var menu: StatusMenuController?
+    private var statusBar: StatusBarController?
     private var settingsWindow: SettingsWindowController?
     private var cancellables: Set<AnyCancellable> = []
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        menu = StatusMenuController(settings: settings, status: status)
-        menu?.onOpenSettings = { [weak self] in self?.showSettings() }
+        statusBar = StatusBarController(settings: settings, status: status)
+        statusBar?.onOpenSettings = { [weak self] in self?.showSettings() }
 
         windows.onChange = { [weak self] in
             guard let self else { return }
