@@ -19,9 +19,9 @@ Each feature gets a row in the menu bar panel's **Features** card with its own o
 
 Windows-style "show desktop" on the trackpad.
 
-- **Swipe down (3 fingers):** minimizes every window of every regular app on the current Space, and remembers exactly which windows it minimized.
+- **Swipe down (3 fingers):** minimizes every window of every regular app on the current Space, and remembers exactly which windows this swipe minimized.
 - **Swipe up (3 fingers):** restores only those windows. Windows you minimized yourself stay minimized.
-- **Repeated swipe down:** each swipe down that minimizes something is remembered as its own group. Swipe up restores only the most recent group; swipe up again for the group before it. A swipe down that minimizes nothing changes nothing.
+- **Only the last swipe down is remembered.** A new swipe down that minimizes something replaces the memory; windows from earlier swipes stay minimized (restore them from the Dock). After a swipe up the memory is empty, so a second swipe up does nothing. A swipe down that minimizes nothing keeps the memory.
 - **Dock thumbnail click** restores one window (macOS behavior). DeskSwipe notices and forgets that window.
 - **Manual restore, window closed, or app quit:** the window is dropped from the list quietly.
 - **Restore order:** back to front, so the window that was in front ends up in front.
@@ -98,3 +98,4 @@ Add ideas here as 💡. Move to 🚧 when work starts, then into **Features** wh
 |---|---|---|
 | 1.0.0 | 2026-10-11 | Swipe to Show Desktop; status panel with feature toggles; settings window; app icon; stable local signing |
 | 1.0.1 | 2026-10-15 | Swipe up restores only the most recent swipe-down group (previously restored everything ever hidden) |
+| 1.0.2 | 2026-10-15 | Only the last swipe down is remembered; earlier groups are no longer kept for repeated swipe ups |

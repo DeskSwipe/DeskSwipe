@@ -71,10 +71,10 @@ struct ShowDesktopControllerTests {
         controller.showDesktop()
         #expect(controller.showDesktop() == 0)
         #expect(controller.remembered == ["a", "b"])
-        #expect(controller.groups.count == 1)
+        #expect(controller.restore() == 2)
     }
 
-    @Test func restoreBringsBackOnlyTheMostRecentSwipe() {
+    @Test func onlyTheLastSwipeDownIsRestored() {
         // The reported scenario: hide everything, bring one window back from
         // the Dock, hide it again, swipe up: only that window returns.
         let fake = FakeWindows([("chrome1", .visible), ("chrome2", .visible), ("code", .visible)])
@@ -84,22 +84,20 @@ struct ShowDesktopControllerTests {
         fake.states["chrome2"] = .visible     // Dock thumbnail click
         controller.forget("chrome2")          // reported by the AX observer
         #expect(controller.showDesktop() == 1)
-        #expect(controller.groups == [["chrome1", "code"], ["chrome2"]])
+        #expect(controller.remembered == ["chrome2"])
+        #expect(!fake.tracked.contains("chrome1"))
 
         #expect(controller.restore() == 1)
         #expect(fake.states["chrome2"] == .visible)
         #expect(fake.states["chrome1"] == .minimized)
         #expect(fake.states["code"] == .minimized)
 
-        // Swiping up again brings back the earlier group.
-        #expect(controller.restore() == 2)
-        #expect(fake.states["chrome1"] == .visible)
-        #expect(fake.states["code"] == .visible)
-        #expect(controller.remembered.isEmpty)
+        // Nothing is remembered any more: a second swipe up does nothing.
         #expect(controller.restore() == 0)
+        #expect(fake.states["chrome1"] == .minimized)
     }
 
-    @Test func newWindowsGetTheirOwnGroup() {
+    @Test func newWindowReplacesTheMemory() {
         let fake = FakeWindows([("a", .visible), ("b", .visible)])
         let controller = ShowDesktopController(controller: fake)
         controller.showDesktop()
@@ -107,28 +105,20 @@ struct ShowDesktopControllerTests {
         fake.order.insert("new", at: 0)
         fake.states["new"] = .visible
         #expect(controller.showDesktop() == 1)
-        #expect(controller.remembered == ["new", "a", "b"])
+        #expect(controller.remembered == ["new"])
 
         #expect(controller.restore() == 1)
         #expect(fake.restoredOrder == ["new"])
-        #expect(controller.restore() == 2)
-        // Back to front within a group, so the frontmost ends up in front.
-        #expect(fake.restoredOrder == ["new", "b", "a"])
+        #expect(fake.states["a"] == .minimized)
+        #expect(fake.states["b"] == .minimized)
     }
 
-    @Test func groupEmptiedByManualRestoresIsSkipped() {
-        // If every window of the newest group was restored by hand, swipe up
-        // restores the group before it instead of doing nothing.
-        let fake = FakeWindows([("a", .visible)])
+    @Test func restoreGoesBackToFront() {
+        let fake = FakeWindows([("front", .visible), ("middle", .visible), ("back", .visible)])
         let controller = ShowDesktopController(controller: fake)
         controller.showDesktop()
-        fake.order.append("b")
-        fake.states["b"] = .visible
-        controller.showDesktop()
-
-        fake.states["b"] = .visible           // restored without a notification
-        #expect(controller.restore() == 1)
-        #expect(fake.states["a"] == .visible)
+        controller.restore()
+        #expect(fake.restoredOrder == ["back", "middle", "front"])
     }
 
     @Test func manuallyRestoredWindowIsDroppedAndNotTouched() {
@@ -150,14 +140,15 @@ struct ShowDesktopControllerTests {
     }
 
     @Test func manuallyRestoredWindowIsPrunedLazily() {
-        // Even without a notification, a restored window drops out on the next swipe.
+        // Even without a notification, a restored window drops out on the next
+        // swipe; re-hiding it makes it the only remembered window.
         let fake = FakeWindows([("a", .visible), ("b", .visible)])
         let controller = ShowDesktopController(controller: fake)
         controller.showDesktop()
 
         fake.states["a"] = .visible
         controller.showDesktop()
-        #expect(controller.remembered == ["a", "b"])
+        #expect(controller.remembered == ["a"])
         #expect(fake.minimizeLog.filter { $0.0 == "a" && $0.1 }.count == 2)
     }
 

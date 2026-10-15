@@ -99,7 +99,7 @@ Lifting fingers or changing the finger count starts a new gesture. If a gesture 
 - **Full-screen windows are skipped.** macOS cannot minimize them this way. The same goes for floating panels and windows without a minimize control.
 - **Only regular apps** (apps with a Dock icon) are affected. DeskSwipe never touches its own windows.
 - **Private framework.** Trackpad input comes from Apple's private `MultitouchSupport` framework, loaded at runtime. A future macOS update could change or remove it. If that happens, the panel shows "Gesture input unavailable" and the app keeps running.
-- Each swipe down is remembered as its own group. Swipe up restores only the most recent group; swipe up again to restore the one before it. For example: hide everything, bring one window back from the Dock, swipe down again, and the next swipe up brings back just that window.
+- Only the last swipe down is remembered. For example: hide everything, bring one window back from the Dock, swipe down again, and the next swipe up brings back just that window; the others stay minimized in the Dock. A swipe down when nothing is visible keeps the memory. Memory is not kept across quitting DeskSwipe.
 - Restore order: windows come back in their original stacking order as far as possible, with the frontmost last.
 
 ## Troubleshooting
@@ -140,7 +140,7 @@ Lifting fingers or changing the finger count starts a new gesture. If a gesture 
 Sources/DeskSwipeCore/          Pure logic, unit tested
   SwipeRecognizer.swift         Frames -> .swipeDown / .swipeUp
   MTTouch.swift                 Typed 96-byte MTTouch struct + frame reduction
-  ShowDesktopController.swift   Which windows each swipe minimized; groups/forget/restore
+  ShowDesktopController.swift   Which windows the last swipe minimized; forget/restore
   GestureConflicts.swift        Detects conflicting system gesture settings
 Sources/DeskSwipe/              The app
   MultitouchService.swift       dlopen/dlsym MultitouchSupport, hot-plug, wake
