@@ -31,10 +31,13 @@ extension WindowControlling {
     public func didStopTracking(_ window: Window) {}
 }
 
-/// Remembers exactly which windows a "show desktop" minimized so that
+/// Remembers exactly which windows each "show desktop" minimized so that
 /// "restore" brings back only those.
 ///
-/// - Swipe down merges into the remembered list; it never replaces it.
+/// - Each swipe down that minimizes something is remembered as its own
+///   group. Restore brings back the most recent group only; restoring again
+///   brings back the group before it. Groups are never overwritten, and a
+///   swipe down that minimizes nothing leaves them untouched.
 /// - Windows that were restored by other means, or whose app quit, are
 ///   dropped quietly (via `forget`, or lazily on the next action).
 /// - Windows the user minimized themselves are never remembered, so restore
@@ -44,9 +47,13 @@ public final class ShowDesktopController<Controller: WindowControlling> {
 
     private let controller: Controller
 
-    /// Frontmost first. Restore walks it back to front so the window that
-    /// was in front ends up in front again.
-    public private(set) var remembered: [Window] = []
+    /// One group per swipe down, oldest first. Within a group windows are
+    /// frontmost first; restore walks a group back to front so the window
+    /// that was in front ends up in front again.
+    public private(set) var groups: [[Window]] = []
+
+    /// Every remembered window, newest group first.
+    public var remembered: [Window] { groups.reversed().flatMap { $0 } }
 
     public init(controller: Controller) {
         self.controller = controller
@@ -56,27 +63,28 @@ public final class ShowDesktopController<Controller: WindowControlling> {
     @discardableResult
     public func showDesktop() -> Int {
         pruneStale()
-        var batch: [Window] = []
-        var seen = Set(remembered)
+        var group: [Window] = []
+        var seen = Set(groups.joined())
         for window in controller.currentWindows() where !seen.contains(window) {
             guard controller.state(of: window) == .visible,
                   controller.setMinimized(window, true) else { continue }
-            batch.append(window)
+            group.append(window)
             seen.insert(window)
         }
-        // The newest batch was in front of anything minimized earlier.
-        remembered = batch + remembered
-        batch.forEach(controller.didStartTracking)
-        return batch.count
+        guard !group.isEmpty else { return 0 }
+        groups.append(group)
+        group.forEach(controller.didStartTracking)
+        return group.count
     }
 
-    /// Restore the windows this controller minimized. Returns how many.
+    /// Restore the most recent group this controller minimized. Returns how
+    /// many windows came back.
     @discardableResult
     public func restore() -> Int {
-        let windows = remembered
-        remembered.removeAll()
+        pruneStale()
+        guard let group = groups.popLast() else { return 0 }
         var restored = 0
-        for window in windows.reversed() {
+        for window in group.reversed() {
             controller.didStopTracking(window)
             if controller.state(of: window) == .minimized, controller.setMinimized(window, false) {
                 restored += 1
@@ -87,16 +95,18 @@ public final class ShowDesktopController<Controller: WindowControlling> {
 
     /// Drop one window, e.g. because the user restored it from the Dock.
     public func forget(_ window: Window) {
-        guard let index = remembered.firstIndex(of: window) else { return }
-        remembered.remove(at: index)
-        controller.didStopTracking(window)
+        forget { $0 == window }
     }
 
     /// Drop every window matching a predicate, e.g. all windows of a quit app.
     public func forget(where shouldForget: (Window) -> Bool) {
-        let dropped = remembered.filter(shouldForget)
+        var dropped: [Window] = []
+        for index in groups.indices {
+            dropped += groups[index].filter(shouldForget)
+            groups[index].removeAll(where: shouldForget)
+        }
         guard !dropped.isEmpty else { return }
-        remembered.removeAll(where: shouldForget)
+        groups.removeAll(where: \.isEmpty)
         dropped.forEach(controller.didStopTracking)
     }
 

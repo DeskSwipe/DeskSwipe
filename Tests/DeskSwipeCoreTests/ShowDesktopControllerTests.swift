@@ -64,24 +64,71 @@ struct ShowDesktopControllerTests {
         #expect(fake.tracked.isEmpty)
     }
 
-    @Test func secondSwipeDownMergesInsteadOfOverwriting() {
+    @Test func swipeDownWithNothingVisibleKeepsTheList() {
         let fake = FakeWindows([("a", .visible), ("b", .visible)])
         let controller = ShowDesktopController(controller: fake)
 
         controller.showDesktop()
-        // Nothing visible now: the list must survive.
         #expect(controller.showDesktop() == 0)
         #expect(controller.remembered == ["a", "b"])
+        #expect(controller.groups.count == 1)
+    }
 
-        // User opens a new window, swipes down again: merged, newest in front.
+    @Test func restoreBringsBackOnlyTheMostRecentSwipe() {
+        // The reported scenario: hide everything, bring one window back from
+        // the Dock, hide it again, swipe up: only that window returns.
+        let fake = FakeWindows([("chrome1", .visible), ("chrome2", .visible), ("code", .visible)])
+        let controller = ShowDesktopController(controller: fake)
+        controller.showDesktop()
+
+        fake.states["chrome2"] = .visible     // Dock thumbnail click
+        controller.forget("chrome2")          // reported by the AX observer
+        #expect(controller.showDesktop() == 1)
+        #expect(controller.groups == [["chrome1", "code"], ["chrome2"]])
+
+        #expect(controller.restore() == 1)
+        #expect(fake.states["chrome2"] == .visible)
+        #expect(fake.states["chrome1"] == .minimized)
+        #expect(fake.states["code"] == .minimized)
+
+        // Swiping up again brings back the earlier group.
+        #expect(controller.restore() == 2)
+        #expect(fake.states["chrome1"] == .visible)
+        #expect(fake.states["code"] == .visible)
+        #expect(controller.remembered.isEmpty)
+        #expect(controller.restore() == 0)
+    }
+
+    @Test func newWindowsGetTheirOwnGroup() {
+        let fake = FakeWindows([("a", .visible), ("b", .visible)])
+        let controller = ShowDesktopController(controller: fake)
+        controller.showDesktop()
+
         fake.order.insert("new", at: 0)
         fake.states["new"] = .visible
         #expect(controller.showDesktop() == 1)
         #expect(controller.remembered == ["new", "a", "b"])
 
-        #expect(controller.restore() == 3)
-        // Back to front, so the newest window ends up in front.
-        #expect(fake.restoredOrder == ["b", "a", "new"])
+        #expect(controller.restore() == 1)
+        #expect(fake.restoredOrder == ["new"])
+        #expect(controller.restore() == 2)
+        // Back to front within a group, so the frontmost ends up in front.
+        #expect(fake.restoredOrder == ["new", "b", "a"])
+    }
+
+    @Test func groupEmptiedByManualRestoresIsSkipped() {
+        // If every window of the newest group was restored by hand, swipe up
+        // restores the group before it instead of doing nothing.
+        let fake = FakeWindows([("a", .visible)])
+        let controller = ShowDesktopController(controller: fake)
+        controller.showDesktop()
+        fake.order.append("b")
+        fake.states["b"] = .visible
+        controller.showDesktop()
+
+        fake.states["b"] = .visible           // restored without a notification
+        #expect(controller.restore() == 1)
+        #expect(fake.states["a"] == .visible)
     }
 
     @Test func manuallyRestoredWindowIsDroppedAndNotTouched() {

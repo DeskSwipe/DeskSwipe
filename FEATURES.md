@@ -21,7 +21,7 @@ Windows-style "show desktop" on the trackpad.
 
 - **Swipe down (3 fingers):** minimizes every window of every regular app on the current Space, and remembers exactly which windows it minimized.
 - **Swipe up (3 fingers):** restores only those windows. Windows you minimized yourself stay minimized.
-- **Repeated swipe down:** merges newly minimized windows into the remembered list; never overwrites it.
+- **Repeated swipe down:** each swipe down that minimizes something is remembered as its own group. Swipe up restores only the most recent group; swipe up again for the group before it. A swipe down that minimizes nothing changes nothing.
 - **Dock thumbnail click** restores one window (macOS behavior). DeskSwipe notices and forgets that window.
 - **Manual restore, window closed, or app quit:** the window is dropped from the list quietly.
 - **Restore order:** back to front, so the window that was in front ends up in front.
@@ -97,3 +97,4 @@ Add ideas here as 💡. Move to 🚧 when work starts, then into **Features** wh
 | Version | Date | Changes |
 |---|---|---|
 | 1.0.0 | 2026-10-11 | Swipe to Show Desktop; status panel with feature toggles; settings window; app icon; stable local signing |
+| 1.0.1 | 2026-10-15 | Swipe up restores only the most recent swipe-down group (previously restored everything ever hidden) |
