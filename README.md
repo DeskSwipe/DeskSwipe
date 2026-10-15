@@ -1,14 +1,54 @@
-# DeskSwipe
+<p align="center">
+  <img src="docs/images/icon.png" width="128" alt="DeskSwipe app icon">
+</p>
 
-Windows-style "show desktop" for macOS, driven by trackpad gestures.
+<h1 align="center">DeskSwipe</h1>
 
-- **3-finger swipe down**: minimize every window of every regular app, and remember exactly which windows this swipe minimized.
-- **3-finger swipe up**: restore only those windows. Windows you minimized yourself stay minimized.
-- After swiping down, clicking a window's Dock thumbnail restores just that window (standard macOS behavior). DeskSwipe notices and forgets that window.
+<p align="center">
+  <b>Windows-style "Show Desktop" for your Mac trackpad.</b><br>
+  Three fingers down hides every window. Three fingers up brings back exactly those windows.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/macOS-14%2B-000000?logo=apple&logoColor=white" alt="macOS 14+">
+  <img src="https://img.shields.io/badge/Swift-5.10%2B-F05138?logo=swift&logoColor=white" alt="Swift 5.10+">
+  <img src="https://img.shields.io/badge/Apple%20Silicon-arm64-555555" alt="Apple Silicon">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license"></a>
+</p>
+
+## Highlights
+
+- **3-finger swipe down** minimizes every window on the current Space, and remembers exactly which ones it hid.
+- **3-finger swipe up** brings back only those windows. Windows you minimized yourself stay put.
+- **Click a Dock thumbnail** to bring back a single window; DeskSwipe notices and leaves it alone.
+- **Menu bar panel** with live status and an on/off switch per feature. No Dock icon.
+- **Adjustable sensitivity**, inverted direction, launch at login.
+- **Free and dependency-free:** builds with Apple's Command Line Tools, no Xcode needed.
 
 See [FEATURES.md](FEATURES.md) for the full feature list, capabilities and backlog.
 
-DeskSwipe is a menu bar app with no Dock icon. Clicking its icon opens a panel with status and an on/off switch for each feature. It is free to build and run with Apple's Command Line Tools, and has no third-party dependencies.
+## Screenshots
+
+<table>
+  <tr>
+    <th>Menu bar panel</th>
+    <th>Settings</th>
+  </tr>
+  <tr>
+    <td align="center" valign="top">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/panel-dark.png">
+        <img src="docs/images/panel-light.png" width="320" alt="Menu bar panel">
+      </picture>
+    </td>
+    <td align="center" valign="top">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/settings-dark.png">
+        <img src="docs/images/settings-light.png" width="420" alt="Settings window">
+      </picture>
+    </td>
+  </tr>
+</table>
 
 ## Requirements
 
@@ -157,6 +197,7 @@ scripts/make-icon.sh            Renders AppIcon.svg into AppIcon.icns
 scripts/setup-signing.sh        Creates the local signing identity
 build.sh
 FEATURES.md                     Feature & capability tracker, backlog, changelog
+docs/images/                    README screenshots, icon and GitHub social preview
 reference/main.swift            Original single-file prototype
 ```
 
