@@ -169,3 +169,7 @@ rm -rf /Applications/DeskSwipe.app
 defaults delete local.deskswipe.DeskSwipe
 tccutil reset Accessibility local.deskswipe.DeskSwipe
 ```
+
+## License
+
+[MIT](LICENSE) © 2026 Adarsh Pandey
