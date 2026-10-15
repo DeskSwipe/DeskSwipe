@@ -53,6 +53,7 @@ Windows-style "show desktop" on the trackpad.
 | Multiple trackpads | ✅ | One recognizer per device |
 | App icon | ✅ | `Resources/AppIcon.svg` → `scripts/make-icon.sh` |
 | Stable code signature | ✅ | `scripts/setup-signing.sh`, so permissions survive rebuilds |
+| DMG packaging & GitHub releases | ✅ | `scripts/make-dmg.sh`; not notarized, so first launch needs "Open Anyway" |
 
 ## Platform & permissions
 

@@ -53,10 +53,22 @@ See [FEATURES.md](FEATURES.md) for the full feature list, capabilities and backl
 ## Requirements
 
 - macOS 14 (Sonoma) or later, Apple Silicon
-- Xcode **or** just the Command Line Tools (`xcode-select --install`), with Swift 5.10 or newer
 - A built-in trackpad or Magic Trackpad
+- To build from source: Xcode **or** just the Command Line Tools (`xcode-select --install`), with Swift 5.10 or newer
 
-## Build
+## Install
+
+1. Download **DeskSwipe-x.y.z.dmg** from the [latest release](https://github.com/adarsh-pandey07/DeskSwipe/releases/latest).
+2. Open the DMG and drag **DeskSwipe** onto **Applications**.
+3. Open DeskSwipe from Applications. Because the app isn't notarized by Apple (that needs a paid developer account), macOS blocks the first launch with a message that it couldn't verify the app. Click **Done**, not *Move to Trash*.
+4. Open **System Settings → Privacy & Security**, scroll down to the message about DeskSwipe being blocked, click **Open Anyway**, and confirm with your password or Touch ID.
+
+   Terminal alternative: `xattr -dr com.apple.quarantine /Applications/DeskSwipe.app`, then open the app.
+5. Continue with [First-run setup](#first-run-setup) below: grant Accessibility and move macOS's own 3-finger swipes to 4 fingers.
+
+DeskSwipe appears in the menu bar (no Dock icon). Click its icon to open the panel.
+
+## Build from source
 
 ```sh
 ./build.sh
@@ -195,6 +207,7 @@ Resources/Info.plist
 Resources/AppIcon.svg          Icon source; scripts/make-icon.sh regenerates AppIcon.icns
 scripts/make-icon.sh            Renders AppIcon.svg into AppIcon.icns
 scripts/setup-signing.sh        Creates the local signing identity
+scripts/make-dmg.sh             Packages build/DeskSwipe.app into a DMG
 build.sh
 FEATURES.md                     Feature & capability tracker, backlog, changelog
 docs/images/                    README screenshots, icon and GitHub social preview
@@ -210,6 +223,19 @@ rm -rf /Applications/DeskSwipe.app
 defaults delete local.deskswipe.DeskSwipe
 tccutil reset Accessibility local.deskswipe.DeskSwipe
 ```
+
+## Releasing a new version
+
+1. Bump `CFBundleShortVersionString` (and increase `CFBundleVersion`) in `Resources/Info.plist`, and add a changelog entry in [FEATURES.md](FEATURES.md).
+2. Build and package:
+   ```sh
+   ./build.sh
+   ./scripts/make-dmg.sh
+   ```
+3. Commit, push, and publish the release with the DMG attached:
+   ```sh
+   gh release create vX.Y.Z build/DeskSwipe-X.Y.Z.dmg --title "DeskSwipe X.Y.Z" --notes "..."
+   ```
 
 ## License
 
