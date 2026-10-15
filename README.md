@@ -16,6 +16,10 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license"></a>
 </p>
 
+<p align="center">
+  <a href="https://github.com/adarsh-pandey07/DeskSwipe/releases/latest"><img src="https://img.shields.io/github/v/release/adarsh-pandey07/DeskSwipe?label=Download%20DMG&style=for-the-badge&logo=apple&logoColor=white&color=6D28D9" alt="Download the latest DMG"></a>
+</p>
+
 ## Highlights
 
 - **3-finger swipe down** minimizes every window on the current Space, and remembers exactly which ones it hid.
@@ -58,7 +62,7 @@ See [FEATURES.md](FEATURES.md) for the full feature list, capabilities and backl
 
 ## Install
 
-1. Download **DeskSwipe-x.y.z.dmg** from the [latest release](https://github.com/adarsh-pandey07/DeskSwipe/releases/latest).
+1. Download **DeskSwipe-x.y.z.dmg** from the [latest release](https://github.com/adarsh-pandey07/DeskSwipe/releases/latest). Optionally check it against the SHA-256 in the release notes: `shasum -a 256 ~/Downloads/DeskSwipe-*.dmg`.
 2. Open the DMG and drag **DeskSwipe** onto **Applications**.
 3. Open DeskSwipe from Applications. Because the app isn't notarized by Apple (that needs a paid developer account), macOS blocks the first launch with a message that it couldn't verify the app. Click **Done**, not *Move to Trash*.
 4. Open **System Settings → Privacy & Security**, scroll down to the message about DeskSwipe being blocked, click **Open Anyway**, and confirm with your password or Touch ID.
@@ -75,6 +79,14 @@ DeskSwipe appears in the menu bar (no Dock icon). Click its icon to open the pan
 ```
 
 This runs the unit tests, builds a release binary for arm64, assembles `build/DeskSwipe.app` with its `Info.plist` (`LSUIElement = true`) and icon, and signs it. Set `SKIP_TESTS=1` to skip the tests.
+
+To package it as a DMG (the same kind attached to releases):
+
+```sh
+./scripts/make-dmg.sh
+```
+
+This creates `build/DeskSwipe-<version>.dmg` containing the app and an **Applications** shortcut for drag-to-install, using macOS's `diskutil`. The script then mounts the DMG read-only, checks that the app's signature is intact, ejects it, and prints its SHA-256 checksum.
 
 ### Keep permissions across rebuilds (recommended if you develop)
 
