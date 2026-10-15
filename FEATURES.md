@@ -13,7 +13,7 @@ Each feature gets a row in the menu bar panel's **Features** card with its own o
 
 | Feature | Status | Since | Trigger | Panel toggle | Settings |
 |---|---|---|---|---|---|
-| [Swipe to Show Desktop](#swipe-to-show-desktop) | ✅ | 1.0.0 | 3-finger swipe down / up | **Swipe to Show Desktop** (`enabled`) | Sensitivity, Invert direction |
+| [Swipe to Show Desktop](#swipe-to-show-desktop) | ✅ | 0.1.0 | 3-finger swipe down / up | **Swipe to Show Desktop** (`enabled`) | Sensitivity, Invert direction |
 
 ### Swipe to Show Desktop
 
@@ -94,8 +94,8 @@ Add ideas here as 💡. Move to 🚧 when work starts, then into **Features** wh
 
 ## Changelog
 
+Versions follow `MAJOR.MINOR.PATCH`. While in 0.x, a new feature bumps MINOR (0.2.0) and a fix bumps PATCH (0.1.1); 1.0.0 is reserved for when the app has proven stable for other people. The build number (`CFBundleVersion`) increases with every release.
+
 | Version | Date | Changes |
 |---|---|---|
-| 1.0.0 | 2026-10-11 | Swipe to Show Desktop; status panel with feature toggles; settings window; app icon; stable local signing |
-| 1.0.1 | 2026-10-15 | Swipe up restores only the most recent swipe-down group (previously restored everything ever hidden) |
-| 1.0.2 | 2026-10-15 | Only the last swipe down is remembered; earlier groups are no longer kept for repeated swipe ups |
+| 0.1.0 | 2026-10-15 | First public release: Swipe to Show Desktop (restores only the windows the last swipe down hid); menu bar panel with status and feature toggles; settings window (sensitivity, invert direction, launch at login); conflicting-gesture warnings; trackpad hot-plug; app icon |
