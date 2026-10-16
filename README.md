@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/adarsh-pandey07/DeskSwipe/releases/latest"><img src="https://img.shields.io/github/v/release/adarsh-pandey07/DeskSwipe?label=Download%20DMG&style=for-the-badge&logo=apple&logoColor=white&color=6D28D9" alt="Download the latest DMG"></a>
+  <a href="https://github.com/DeskSwipe/DeskSwipe/releases/latest"><img src="https://img.shields.io/github/v/release/DeskSwipe/DeskSwipe?label=Download%20DMG&style=for-the-badge&logo=apple&logoColor=white&color=6D28D9" alt="Download the latest DMG"></a>
 </p>
 
 ## Highlights
@@ -62,7 +62,7 @@ See [FEATURES.md](FEATURES.md) for the full feature list, capabilities and backl
 
 ## Install
 
-1. Download **DeskSwipe-x.y.z.dmg** from the [latest release](https://github.com/adarsh-pandey07/DeskSwipe/releases/latest). Optionally check it against the SHA-256 in the release notes: `shasum -a 256 ~/Downloads/DeskSwipe-*.dmg`.
+1. Download **DeskSwipe-x.y.z.dmg** from the [latest release](https://github.com/DeskSwipe/DeskSwipe/releases/latest). Optionally check it against the SHA-256 in the release notes: `shasum -a 256 ~/Downloads/DeskSwipe-*.dmg`.
 2. Open the DMG and drag **DeskSwipe** onto **Applications**.
 3. Open DeskSwipe from Applications. Because the app isn't notarized by Apple (that needs a paid developer account), macOS blocks the first launch with a message that it couldn't verify the app. Click **Done**, not *Move to Trash*.
 4. Open **System Settings → Privacy & Security**, scroll down to the message about DeskSwipe being blocked, click **Open Anyway**, and confirm with your password or Touch ID.
