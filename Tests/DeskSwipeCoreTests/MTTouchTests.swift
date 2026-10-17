@@ -64,6 +64,16 @@ struct MTTouchTests {
         #expect(frame.timestamp == 1.5)
     }
 
+    @Test func fingersKeepTheirPathIndexAsID() {
+        let touches = [
+            MTTouch(pathIndex: 7, normalizedVector: .init(position: .init(x: 0.2, y: 0.3))),
+            MTTouch(pathIndex: 9, state: MTTouchState.hoverInRange.rawValue),
+            MTTouch(pathIndex: 4, normalizedVector: .init(position: .init(x: 0.6, y: 0.7))),
+        ]
+        let frame = TouchFrame(touches: touches, timestamp: 0)
+        #expect(frame.fingers == [.init(id: 7, x: 0.2, y: 0.3), .init(id: 4, x: 0.6, y: 0.7)])
+    }
+
     @Test func emptyFrameHasZeroFingers() {
         let frame = TouchFrame(touches: [MTTouch](), timestamp: 0)
         #expect(frame.fingerCount == 0)

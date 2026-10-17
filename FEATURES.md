@@ -33,7 +33,7 @@ Windows-style "show desktop" on the trackpad.
 | Sensitivity (swipe distance) | `swipeThreshold` | `0.18` (18% of trackpad height) | 0.08–0.40 |
 | Invert direction | `invertDirection` | `false` | on/off |
 
-**Gesture rules:** exactly 3 fingers; vertical travel within 0.6 s ≥ threshold; vertical > 1.5× horizontal; fires once per gesture; a gesture that ever reaches 4+ fingers is ignored until all fingers lift.
+**Gesture rules:** exactly 3 fingers; vertical travel within 0.6 s ≥ threshold; vertical > 1.5× horizontal; each of the 3 fingers moves that way by at least half the threshold (so two scrolling fingers plus a resting thumb or palm don't count); fires once per gesture; a gesture that ever reaches 4+ fingers, or where fingers were already moving before the third landed (a scroll in progress), is ignored until all fingers lift.
 
 **Code:** `SwipeRecognizer` and `ShowDesktopController` (DeskSwipeCore, unit tested); `WindowManager` and `MultitouchService` (app).
 
@@ -99,4 +99,5 @@ Versions follow `MAJOR.MINOR.PATCH`. While in 0.x, a new feature bumps MINOR (0.
 
 | Version | Date | Changes |
 |---|---|---|
+| 0.1.1 | 2026-10-17 | Fix: two-finger scrolling could trigger a swipe when a thumb, palm or third finger touched the trackpad. Every finger must now move with the swipe, and a gesture that starts as a scroll is ignored |
 | 0.1.0 | 2026-10-15 | First public release: Swipe to Show Desktop (restores only the windows the last swipe down hid); menu bar panel with status and feature toggles; settings window (sensitivity, invert direction, launch at login); conflicting-gesture warnings; trackpad hot-plug; app icon |

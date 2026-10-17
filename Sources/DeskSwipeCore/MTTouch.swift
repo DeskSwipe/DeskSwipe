@@ -120,18 +120,11 @@ public enum MTTouchState: Int32, Sendable {
 }
 
 extension TouchFrame {
-    /// Reduce one contact frame to finger count and averaged position,
-    /// counting only fingers that are on the surface.
+    /// Reduce one contact frame to the fingers that are on the surface.
     public init<C: Collection>(touches: C, timestamp: Double) where C.Element == MTTouch {
-        var count = 0
-        var sumX: Float = 0
-        var sumY: Float = 0
-        for touch in touches where touch.isOnSurface {
-            count += 1
-            sumX += touch.normalizedVector.position.x
-            sumY += touch.normalizedVector.position.y
+        let fingers = touches.filter(\.isOnSurface).map {
+            Finger(id: $0.pathIndex, x: $0.normalizedVector.position.x, y: $0.normalizedVector.position.y)
         }
-        let n = Float(max(count, 1))
-        self.init(fingerCount: count, x: sumX / n, y: sumY / n, timestamp: timestamp)
+        self.init(fingers: fingers, timestamp: timestamp)
     }
 }

@@ -37,6 +37,25 @@ private func lift(at time: Double) -> TouchFrame {
     TouchFrame(fingerCount: 0, x: 0, y: 0, timestamp: time)
 }
 
+/// Fingers that each move on their own path. `paths` maps a finger id to its
+/// start and end; fingers listed in `still` stay at their position.
+private func moveFingers(
+    _ paths: [Int32: (from: (x: Float, y: Float), to: (x: Float, y: Float))],
+    still: [Int32: (x: Float, y: Float)] = [:],
+    duration: Double,
+    startTime: Double = 0
+) -> [TouchFrame] {
+    let steps = max(1, Int((duration / frameInterval).rounded()))
+    return (0...steps).map { i in
+        let f = Float(i) / Float(steps)
+        var fingers = paths.map { id, p in
+            TouchFrame.Finger(id: id, x: p.from.x + (p.to.x - p.from.x) * f, y: p.from.y + (p.to.y - p.from.y) * f)
+        }
+        fingers += still.map { TouchFrame.Finger(id: $0.key, x: $0.value.x, y: $0.value.y) }
+        return TouchFrame(fingers: fingers.sorted { $0.id < $1.id }, timestamp: startTime + Double(i) * frameInterval)
+    }
+}
+
 private func recognize(_ frames: [TouchFrame], configuration: SwipeRecognizerConfiguration = .init()) -> [SwipeGesture] {
     var recognizer = SwipeRecognizer(configuration: configuration)
     return frames.compactMap { recognizer.process($0) }
@@ -151,5 +170,62 @@ struct SwipeRecognizerTests {
     @Test func thresholdIsConfigurable() {
         let frames = gesture(from: (0.5, 0.5), to: (0.5, 0.4))
         #expect(recognize(frames, configuration: .init(threshold: 0.08)) == [.swipeDown])
+    }
+
+    // MARK: - Two-finger scrolling must never count as a 3-finger swipe
+
+    @Test func twoMovingFingersAndARestingThumbAreIgnored() {
+        // The average of the three moves 0.27, past the threshold, but the
+        // thumb never moves: this is a scroll with a thumb on the pad.
+        let frames = moveFingers(
+            [1: ((0.45, 0.8), (0.45, 0.4)), 2: ((0.55, 0.8), (0.55, 0.4))],
+            still: [3: (0.3, 0.2)],
+            duration: 0.2
+        )
+        #expect(recognize(frames).isEmpty)
+    }
+
+    @Test func thumbLandingDuringAScrollIsIgnored() {
+        // Two fingers are already scrolling when a third contact lands, and
+        // the scroll carries on.
+        let scroll = moveFingers([1: ((0.45, 0.9), (0.45, 0.7)), 2: ((0.55, 0.9), (0.55, 0.7))], duration: 0.1)
+        let withThumb = moveFingers(
+            [1: ((0.45, 0.7), (0.45, 0.2)), 2: ((0.55, 0.7), (0.55, 0.2)), 3: ((0.3, 0.3), (0.3, 0.1))],
+            duration: 0.2,
+            startTime: scroll.last!.timestamp + frameInterval
+        )
+        #expect(recognize(scroll + withThumb).isEmpty)
+    }
+
+    @Test func scrollThatPicksUpAThirdFingerStaysIgnoredUntilLift() {
+        // Even if all three then move together, the gesture began as a scroll.
+        let scroll = moveFingers([1: ((0.45, 0.9), (0.45, 0.75)), 2: ((0.55, 0.9), (0.55, 0.75))], duration: 0.1)
+        let three = move(from: (0.5, 0.75), to: (0.5, 0.3), duration: 0.2, startTime: scroll.last!.timestamp + frameInterval)
+        let next = gesture(from: (0.5, 0.7), to: (0.5, 0.3), startTime: three.last!.timestamp + 0.1)
+        let afterLift = [lift(at: three.last!.timestamp + frameInterval)] + next
+        #expect(recognize(scroll + three + afterLift) == [.swipeDown])
+    }
+
+    @Test func fingersThatJitterWhileLandingStillSwipe() {
+        // Real fingers wobble a little as they land; that is not a scroll.
+        let landing = [
+            TouchFrame(fingers: [.init(id: 1, x: 0.45, y: 0.70)], timestamp: 0),
+            TouchFrame(fingers: [.init(id: 1, x: 0.455, y: 0.71), .init(id: 2, x: 0.55, y: 0.70)], timestamp: 0.01),
+        ]
+        let swipe = moveFingers(
+            [1: ((0.455, 0.71), (0.455, 0.3)), 2: ((0.55, 0.70), (0.55, 0.3)), 3: ((0.65, 0.68), (0.65, 0.3))],
+            duration: 0.2,
+            startTime: 0.02
+        )
+        #expect(recognize(landing + swipe) == [.swipeDown])
+    }
+
+    @Test func swipeWithUnevenFingersStillFires() {
+        // One finger travels less than the others, but still well over half.
+        let frames = moveFingers(
+            [1: ((0.45, 0.7), (0.45, 0.3)), 2: ((0.55, 0.7), (0.55, 0.3)), 3: ((0.65, 0.65), (0.65, 0.5))],
+            duration: 0.2
+        )
+        #expect(recognize(frames) == [.swipeDown])
     }
 }
